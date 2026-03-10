@@ -44,10 +44,6 @@ Once installed, update with:
 kubectl krew upgrade debug-pvc
 ```
 
-> **Note:** The first release of this plugin must be manually submitted to the
-> [krew-index](https://github.com/kubernetes-sigs/krew-index). Subsequent
-> releases are automated via [krew-release-bot](https://github.com/rajatjindal/krew-release-bot).
-
 ### From source
 
 ```bash
@@ -105,13 +101,14 @@ kubectl debug-pvc -n my-namespace -p my-pod-0 -v data:/debug/data -i alpine:late
 ### Flags
 
 | Flag | Short | Default | Description |
-|------|-------|---------|-------------|
+|---|---|---|---|
 | `--namespace` | `-n` | | Kubernetes namespace |
 | `--pod` | `-p` | | Pod name |
 | `--volume` | `-v` | | Volume mount as `name:mountpath` (repeatable) |
 | `--image` | `-i` | `ubuntu:latest` | Debug container image |
 | `--mount-base` | | `/debug` | Base mount path (interactive mode) |
 | `--kubeconfig` | | standard resolution | Path to kubeconfig file |
+| `--context` | | current context | Kubeconfig context to use |
 
 ## TUI keyboard shortcuts
 

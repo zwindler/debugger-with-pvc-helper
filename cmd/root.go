@@ -24,7 +24,7 @@ var (
 
 // rootCmd represents the base command.
 var rootCmd = &cobra.Command{
-	Use:   "kubectl-debug_pvc",
+	Use:   "kubectl debug-pvc",
 	Short: "Debug Kubernetes pods with PVC volume access via ephemeral containers",
 	Long: `kubectl debug-pvc creates an ephemeral debug container in a running pod
 with access to its PVC-mounted volumes.

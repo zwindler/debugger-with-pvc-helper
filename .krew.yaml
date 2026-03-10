@@ -16,7 +16,7 @@ spec:
     are provided.
   caveats: |
     This plugin requires that the target cluster supports ephemeral containers
-    (Kubernetes 1.23+).
+    (Kubernetes 1.25+, where ephemeral containers reached GA).
   platforms:
   - selector:
       matchLabels:
