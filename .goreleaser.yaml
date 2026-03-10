@@ -52,15 +52,17 @@ checksum:
 # No long-lived private key is required: cosign uses the GitHub Actions OIDC
 # token to obtain a short-lived certificate from Fulcio and records the
 # signature in the Rekor transparency log.
+# Uses --bundle flag (new cosign bundle format) which combines the certificate
+# and signature into a single .sigstore.json file.
 signs:
   - cmd: cosign
     # Sign the checksum file; verifying one file is enough since all artifact
     # hashes are inside it. Use --yes to suppress interactive prompts in CI.
+    signature: "${artifact}.sigstore.json"
     args:
       - sign-blob
+      - --bundle=${signature}
       - --yes
-      - --output-certificate=${certificate}
-      - --output-signature=${signature}
       - ${artifact}
     artifacts: checksum
     output: true
