@@ -33,9 +33,10 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      # Quality gate: the tag is not released if checks fail.
+      # Quality gate: run go vet before releasing.
+      # golangci-lint is already enforced by the CI workflow on every push to main.
       - name: Run checks
-        run: make check
+        run: go vet ./...
 
       # cosign uses the GitHub Actions OIDC token to get a short-lived cert
       # from Sigstore Fulcio. No private key is stored anywhere; the signature
