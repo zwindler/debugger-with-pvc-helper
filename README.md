@@ -6,6 +6,8 @@ A kubectl plugin that creates ephemeral debug containers in running Kubernetes p
 
 The only way to attach volume mounts to an ephemeral container is to call the Kubernetes API directly. This tool does exactly that, and wraps the entire workflow — PVC discovery, pod filtering, volume selection, patch construction, readiness wait, and attach — into a single command.
 
+![kubectl debug-pvc demo](assets/kubectl-debug-pvc-demo.gif)
+
 ## Why
 
 When a pod holds an exclusive (RWO) lock on a PVC, you can't simply spin up another pod to inspect the data. You need to get into the running pod's context with access to those volumes. `kubectl debug` gets you an ephemeral container but without volume mounts. This tool bridges that gap.
@@ -240,13 +242,12 @@ git push origin v1.2.3
 
 The `release` workflow then:
 
-1. Runs `make check` (go vet + golangci-lint) — the tag is rejected if checks fail
+1. Runs `go vet ./...` as a quality gate — the tag is rejected if it fails
 2. Builds binaries for Linux, macOS, and Windows (amd64 + arm64) with `-trimpath` and `CGO_ENABLED=0` for reproducible, statically linked binaries
 3. Packages each binary as a `.tar.gz` (`.zip` on Windows) with the LICENSE and README
 4. Produces a SHA-256 checksum file covering all archives
 5. Signs the checksum file with [cosign](https://github.com/sigstore/cosign) using **keyless signing** — no private key is stored anywhere; the GitHub Actions OIDC token is used to obtain a short-lived certificate from [Sigstore Fulcio](https://github.com/sigstore/fulcio), and the signature is recorded in the [Rekor](https://github.com/sigstore/rekor) public transparency log
-6. Generates a CycloneDX SBOM for each archive using [syft](https://github.com/anchore/syft)
-7. Creates the GitHub Release with all assets attached
+6. Creates the GitHub Release with all assets attached
 
 ### Verifying a release
 
@@ -256,11 +257,9 @@ To verify the checksum file signature after downloading:
 # Download the release assets
 gh release download v1.2.3 --repo zwindler/kubectl-debug-pvc
 
-# Verify the signature against the Rekor transparency log
-# (no local key needed — cosign looks up the cert in Rekor)
+# Verify the cosign bundle against the Rekor transparency log
 cosign verify-blob \
-  --certificate kubectl-debug_pvc_v1.2.3_checksums.txt.pem \
-  --signature  kubectl-debug_pvc_v1.2.3_checksums.txt.sig \
+  --bundle kubectl-debug_pvc_v1.2.3_checksums.txt.sigstore.json \
   --certificate-identity-regexp "https://github.com/zwindler/kubectl-debug-pvc/.github/workflows/release.yml@refs/tags/v.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   kubectl-debug_pvc_v1.2.3_checksums.txt
@@ -273,7 +272,6 @@ sha256sum --check --ignore-missing kubectl-debug_pvc_v1.2.3_checksums.txt
 
 - All workflow permissions default to `{}` (none); each job grants only what it needs
 - All third-party actions are pinned to immutable commit SHAs, not mutable version tags
-- The runner is hardened with [step-security/harden-runner](https://github.com/step-security/harden-runner) in `audit` mode (egress monitoring)
 - `id-token: write` is granted only to the release job, and only for the duration of that job
 - `GITHUB_TOKEN` is the only secret used — no external credentials are stored in the repository
 
